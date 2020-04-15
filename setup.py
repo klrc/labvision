@@ -23,7 +23,7 @@ setup(
 
     packages=find_packages(),
     include_package_data=True,
-    platforms="any",
+    platforms=["all"],
     install_requires=["torch","torchvision"]  # 这个项目需要的第三方库
 )
 

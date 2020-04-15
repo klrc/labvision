@@ -8,4 +8,4 @@ Author-email: sh@mail.ecust.edu.com
 License: MIT Licence
 Description: experimental platform for CV research.
 Keywords: pip,labvision,ecust
-Platform: any
+Platform: all
