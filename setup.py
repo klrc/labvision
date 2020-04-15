@@ -14,15 +14,20 @@ setup(
     version="0.0.1",  # 版本号，数值大的会优先被pip
     keywords=("pip", "labvision", "ecust"),
     description="ecust vision lab platform",
-    long_description="just for fun",
+    long_description="experimental platform for CV research.",
     license="MIT Licence",
 
-    url="https://github.com/LiangjunFeng/SICA",  # 项目相关文件地址，一般是github
+    url="https://github.com/klrc/labvision",  # 项目相关文件地址，一般是github
     author="klrc",
     author_email="sh@mail.ecust.edu.com",
 
     packages=find_packages(),
     include_package_data=True,
     platforms="any",
-    install_requires=["numpy"]  # 这个项目需要的第三方库
+    install_requires=["torch","torchvision"]  # 这个项目需要的第三方库
 )
+
+
+'''
+    >>> python setup.py sdist 
+'''
