@@ -13,6 +13,8 @@ labvision/datasets/fi.py
 labvision/datasets/iaps.py
 labvision/datasets/ldl.py
 labvision/datasets/utils.py
+labvision/io/__init__.py
+labvision/io/auto_control.py
 labvision/transforms/__init__.py
 labvision/transforms/_basic.py
 labvision/transforms/casnet_cvpr_2018.py
