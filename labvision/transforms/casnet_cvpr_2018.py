@@ -1,5 +1,8 @@
-from ._basic import basic_resize
+from .chained_transform import ChainedTransform
 
 
 def casnet_fixation_transform():
-    return basic_resize(size=(18, 25), with_normalize=False)
+    x = ChainedTransform()
+    x = x.ToPILImage().Resize((18, 25))
+    x = x.ToTensor()
+    return x

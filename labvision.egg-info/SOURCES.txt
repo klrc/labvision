@@ -17,6 +17,6 @@ labvision/io/__init__.py
 labvision/io/auto_control.py
 labvision/io/visualize.py
 labvision/transforms/__init__.py
-labvision/transforms/_basic.py
 labvision/transforms/casnet_cvpr_2018.py
 labvision/transforms/chained_transform.py
+labvision/transforms/functional.py

@@ -10,24 +10,27 @@ class ChainedTransform():
                 >>> def basic_normalize(**args):
                 >>>    x = ChainedTransform()
                 >>>    x = x.ToPILImage().ToTensor().Normalize(**args)
-                >>>    return x.Compose()
+                >>>    return x
             example_2:
                 >>> transf = ChainedTransform()
-                >>> transf = transf.ToPILImage().ToTensor().Compose()
+                >>> transf = transf.ToPILImage().ToTensor()
         """
         self.transforms = []
+        self._compiled_transform = None
+
+    def __call__(self, pic):
+        if self._compiled_transform is None:
+            self._compile()
+        return self._compiled_transform(pic)
 
     def _add(self, transform):
         self.transforms.append(transform)
         return self
 
     def _compile(self):
-        return transforms.Compose(self.transforms)
-
-    def Compose(self, _transforms=None):
-        if _transforms:
-            self.transforms.extend(_transforms)
-        return self._compile()
+        t = transforms.Compose(self.transforms)
+        self._compiled_transform = t
+        return t
 
     def ToTensor(self, **args):
         return self._add(transforms.ToTensor(**args))

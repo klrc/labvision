@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 import torch
 import torch.utils.data as data
-from labvision.transforms import no_transform
+from labvision.transforms import empty_transform
 sys.path.append('.')
 
 
@@ -42,6 +42,7 @@ class Dataset(data.Dataset):
                 transform:
         """
         self.transform = transform
+        self._empty_transform = empty_transform()
         self.__loaddata__(root, train)
         self.ys = {x: [] for x in self.label_types}
         self.__loadtarget__(root)
@@ -140,7 +141,7 @@ class Dataset(data.Dataset):
                 index:
         """
         img = self.__cvimg__(self.data[index])
-        img = no_transform()(img) if self.transform is None else self.transform(img)
+        img = self._empty_transform(img) if self.transform is None else self.transform(img)
         target = [self.ys[k][index] for k in self.ys.keys()]
         return img, target
 
