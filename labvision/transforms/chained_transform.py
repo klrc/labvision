@@ -4,6 +4,17 @@ from torchvision.transforms import transforms
 class ChainedTransform():
 
     def __init__(self):
+        """
+            chained tranform for torchvision.transforms.
+            example_1:
+                >>> def basic_normalize(**args):
+                >>>    x = ChainedTransform()
+                >>>    x = x.ToPILImage().ToTensor().Normalize(**args)
+                >>>    return x.Compose()
+            example_2:
+                >>> transf = ChainedTransform()
+                >>> transf = transf.ToPILImage().ToTensor().Compose()
+        """
         self.transforms = []
 
     def _add(self, transform):
@@ -98,7 +109,3 @@ class ChainedTransform():
 
     def RandomErasing(self, **args):
         return self._add(transforms.RandomErasing(**args))
-
-
-
-

@@ -9,6 +9,10 @@ import json
 
 class Status():
     def __init__(self):
+        """
+            inner status class of AutoControl,
+            supports reading /saving /loading.
+        """
         self.status_dict = {'hash': self.__genhash__()}
 
     @staticmethod
@@ -55,6 +59,50 @@ class AutoControl():
                  dataset_transforms=None, dataset_args={},
                  optimizer=torch.optim.SGD, optimizer_args={},
                  forward_func=None, loss_func=None, eval_func=None, **fpargs):
+        """
+            automatic train/eval/stop controller for torch.nn.Module,
+
+            Args:
+                dataset:
+                model:
+                dataset_transforms:
+                dataset_args:
+                optimizer:
+                optimizer_args:
+                forward_func:
+                loss_func:
+                eval_func:
+                fpargs:
+
+            example:
+                >>> import labvision
+                >>> from labvision.io import AutoControl
+                >>> import torch.nn.functional as F
+
+                >>> def loss_func(logits, targets):
+                >>>     x, v = logits
+                >>>     return F.CrossEntropyLoss(x, targets)+F.CrossEntropyLoss(v, targets)
+
+                >>> control = AutoControl(
+                >>>     dataset=labvision.datasets.EMOd,
+                >>>     dataset_transforms=(labvision.transforms.centercrop_224, labvision.transforms.centercrop_224),
+                >>>     model=torchvision.models.resnet50(),
+                >>>     optimizer=torch.optim.SGD,
+                >>>     optimizer_args={'lr': 0.001, 'weight_decay': 0.9},
+                >>>     log_fp='external/rec.log',
+                >>>     forward_func=lambda m, x: m(x[0]),
+                >>>     loss_func=loss_func,
+                >>> )
+
+                >>> for model, status in control.step(interval=5):
+                >>>     if status.epoch_finished():
+                >>>         metrics = control.eval(model)
+                >>>         control.log(metrics)
+
+                >>>     # torch.save(model, f'build/{status.hash}.pth')
+                >>>     status.freeze()
+
+        """
         self._init_datasets(dataset, dataset_transforms, **dataset_args)
         self.model = model
         self._init_optimizer(optimizer, **optimizer_args)
@@ -66,16 +114,32 @@ class AutoControl():
         self.under_test = False
 
     def load_status(self, fp, recover_optimizer=False):
+        """
+            load status from fp,
+            Args:
+                fp:
+                recover_optimizer: recover_optimizer=True if need to recover specific optimizer state_dict.
+        """
         self.status.load(fp)
         if recover_optimizer:
             self.optimizer.load_state_dict(self.status.optimizer())
         return self
 
     def save_status(self, fp):
+        """
+            save status to fp,
+            Args:
+                fp:
+        """
         self.status.freeze(fp)
         return self
 
     def load_model(self, fp):
+        """
+            load frozen model from fp,
+            Args:
+                fp:
+        """
         state_dict = torch.load(fp)
         self.model.load_state_dict(state_dict)
         return self
@@ -117,8 +181,10 @@ class AutoControl():
 
     def log(self, msg, display=True):
         """
+            display(optional) & save log.
             Args:
                 msg: str or metrics dict.
+                display:
 
             example:
                 >>> ac.log('acc@top1:'+acc)
@@ -131,6 +197,11 @@ class AutoControl():
         return self.__log__(f'[{self.status.epoch()}, {self.status.iter():5d}/{len(self.trainloader)}] {msg}', display=display)
 
     def __log__(self, msg, display=True):
+        """
+            Args:
+                msg:
+                display:
+        """
         line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}]<{self.status.hash()}>\t'+msg
         if self.under_test:
             line = f'testing# {line}'
@@ -140,6 +211,11 @@ class AutoControl():
         return self
 
     def check(self):
+        """
+            check if autocontrol will work properly,
+            all loops are cut for 1 loop only in this mode,
+            also logs are annotated to be disabled for visualize.
+        """
         self.under_test = True
         self.__log__('testing ..')
         self.__log__(self.__str__())
@@ -170,6 +246,12 @@ class AutoControl():
 
     @staticmethod
     def __eval__(model, item, ks=(1, 3)):
+        """
+            Args:
+                model:
+                item:
+                ks: top-k accs to be evaluated.
+        """
         x, targets = item
         logits = model(Variable(x).cuda())
         metrics = {f'acc@top{k}': 0 for k in ks}
@@ -178,6 +260,9 @@ class AutoControl():
 
     def step(self, interval=1, val_interval=4, auto_log=True):
         """
+            step to the next checkpoint,
+            works as a generator.
+
             Args:
                 interval:
                 val_interval:
@@ -265,11 +350,24 @@ class AutoControl():
 
     @staticmethod
     def __forward__(model, item):
+        """
+            Args:
+                item:
+
+            override if needed.
+        """
         x, _ = item
         return model(Variable(x).cuda())
 
     @staticmethod
     def __loss__(logits, item):
+        """
+            Args:
+                logits:
+                item:
+
+            override if needed.
+        """
         _, targets = item
         return torch.nn.functional.cross_entropy(logits, Variable(targets).cuda())
 

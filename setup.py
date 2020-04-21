@@ -29,7 +29,7 @@ setup(
 
 
 '''
-    >>> python setup.py sdist 
+    >>> python setup.py sdist
     >>> twine upload dist/labvision-0.0.x.tar.gz
     >>> pip install labvision -i https://pypi.org/simple
 '''
