@@ -3,6 +3,7 @@ import numpy as np
 import random
 from .utils import Dataset
 import json
+from torch.autograd import Variable
 
 
 def __maxidx__(_list):
@@ -41,3 +42,11 @@ class FI(Dataset):
             y = [1 if _str == label else 0 for _str in labels]
             self.ys['single'].append(__maxidx__(y))
             self.ys['distribution'].append(y)
+
+    @staticmethod
+    def __readsingle__(sample):
+        """
+            4 autocontrol*
+        """
+        x, (y, _) = sample
+        return Variable(x).cuda(), Variable(y).cuda()

@@ -276,6 +276,16 @@ class AutoControl():
         self.status.freeze(fp)
         return self
 
+    def save_model(self, fp):
+        """
+            save model to fp,
+            Args:
+                fp:
+        """
+        state_dict = self.model.state_dict()
+        torch.save(state_dict, fp)
+        return self
+
     def load_model(self, fp):
         """
             load frozen model from fp,
@@ -313,6 +323,7 @@ class AutoControl():
         self.__log__('testing ..')
         self.__log__(self.__str__())
         _ = next(self.step(interval=1, val_interval=1))
+        _ = self.eval(auto_log=True)
         self.__log__('test passed.')
         self.under_test = False
 
