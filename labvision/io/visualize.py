@@ -14,6 +14,7 @@ class Visualize():
     def __init__(self, log_fp='rec.log'):
         self.log_fp = log_fp
         self.data = []
+        self.axis_type = 'plt'
 
     @staticmethod
     def __read__(fp, _hash, target=None):
@@ -71,7 +72,7 @@ class Visualize():
         })
         return self
 
-    def __plotcurve__(self, axis_type='plt', **kwargs):
+    def __plotcurve__(self, axis_type, **kwargs):
         if axis_type == 'plt':
             legends = []
             for d in self.data:
@@ -81,7 +82,7 @@ class Visualize():
                 legends.append(description['legend'])
                 plt.plot(data_x, data_y, **kwargs)
             plt.legend(legends)
-        elif axis_type == 'twin':
+        elif axis_type == 'twinx':
             _, acc_ax = plt.subplots()
             loss_ax = acc_ax.twinx()
             acc_ax.set_xlabel("epoches")
@@ -104,18 +105,7 @@ class Visualize():
 
     def plot(self, **kwargs):
         if type(self.data) is list:
-            curve_types = []
-            for d in self.data:
-                metrics_name = d['description']['metrics_name']
-                if 'loss' in metrics_name and 'loss' not in curve_types:
-                    curve_types.append('loss')
-                elif 'acc' in metrics_name and 'acc' not in curve_types:
-                    curve_types.append('acc')
-            if len(curve_types) >= 2:
-                axis_type = 'twin'
-            else:
-                axis_type = 'plt'
-            self.__plotcurve__(axis_type=axis_type, **kwargs)
+            self.__plotcurve__(axis_type=self.axis_type, **kwargs)
 
         self.data = []
         return self
@@ -136,6 +126,10 @@ class Visualize():
             clear plt canvas.
         """
         plt.close('all')
+
+    def twinx(self):
+        self.axis_type = 'twinx'
+        return self
 
     # --------------------------------unimplemented below --------------------------------------------
 
