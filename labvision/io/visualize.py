@@ -15,6 +15,7 @@ class Visualize():
         self.log_fp = log_fp
         self.data = []
         self.axis_type = 'plt'
+        self.legends = {}
 
     @staticmethod
     def __read__(fp, _hash, target=None):
@@ -28,7 +29,7 @@ class Visualize():
                         continue
                     if not target:
                         yield found
-                    if target in found['metrics_name']:
+                    if target == found['metrics_name']:
                         yield found
 
     @staticmethod
@@ -74,39 +75,32 @@ class Visualize():
 
     def __plotcurve__(self, axis_type, **kwargs):
         if axis_type == 'plt':
-            legends = []
+            if 'plt' not in self.legends:
+                self.legends['plt'] = []
             for d in self.data:
                 data_x = d['data_x']
                 data_y = d['data_y']
                 description = d['description']
-                legends.append(description['legend'])
+                self.legends.append(description['legend'])
                 plt.plot(data_x, data_y, **kwargs)
-            plt.legend(legends)
         elif axis_type == 'twinx':
-            _, acc_ax = plt.subplots()
-            loss_ax = acc_ax.twinx()
-            acc_ax.set_xlabel("epoches")
-            acc_ax.set_ylabel("accuracy")
-            loss_ax.set_ylabel("loss")
-            legends_acc = []
-            legends_loss = []
+            if 'acc_ax' not in self.legends:
+                self.legends['acc_ax'] = []
+                self.legends['loss_ax'] = []
             for d in self.data:
                 data_x = d['data_x']
                 data_y = d['data_y']
                 description = d['description']
                 if 'loss' in description['metrics_name']:
-                    legends_loss.append(description['legend'])
-                    loss_ax.plot(data_x, data_y, **kwargs)
+                    self.legends['loss_ax'].append(description['legend'])
+                    self.loss_ax.plot(data_x, data_y, **kwargs)
                 elif 'acc' in description['metrics_name']:
-                    legends_acc.append(description['legend'])
-                    acc_ax.plot(data_x, data_y, **kwargs)
-            acc_ax.legend(legends_acc)
-            loss_ax.legend(legends_loss)
+                    self.legends['acc_ax'].append(description['legend'])
+                    self.acc_ax.plot(data_x, data_y, **kwargs)
 
     def plot(self, **kwargs):
         if type(self.data) is list:
             self.__plotcurve__(axis_type=self.axis_type, **kwargs)
-
         self.data = []
         return self
 
@@ -116,6 +110,12 @@ class Visualize():
             Args:
                 path:
         """
+        if self.axis_type == 'plt':
+            plt.legend(self.legends['plt'])
+        elif self.axis_type == 'twinx':
+            self.acc_ax.legend(self.legends['acc_ax'])
+            self.loss_ax.legend(self.legends['loss_ax'])
+        self.legends = {}
         plt.show()
         plt.savefig(path, pad_inches=0)
         print(f'saved as {path}')
@@ -129,6 +129,13 @@ class Visualize():
 
     def twinx(self):
         self.axis_type = 'twinx'
+        _, acc_ax = plt.subplots()
+        loss_ax = acc_ax.twinx()
+        acc_ax.set_xlabel("epoches")
+        acc_ax.set_ylabel("accuracy")
+        loss_ax.set_ylabel("loss")
+        self.acc_ax = acc_ax
+        self.loss_ax = loss_ax
         return self
 
     # --------------------------------unimplemented below --------------------------------------------
