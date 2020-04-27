@@ -1,3 +1,4 @@
+import imageio
 import re
 import matplotlib.pyplot as plt
 import shutil
@@ -11,11 +12,13 @@ sys.path.append('.')
 
 
 class Visualize():
-    def __init__(self, log_fp='rec.log'):
+    def __init__(self, log_fp='rec.log', cache_dir='build/cache'):
         self.log_fp = log_fp
+        self.cache_dir = cache_dir
         self.data = []
         self.axis_type = 'plt'
         self.legends = {}
+        self.dtype = 'curve'
 
     @staticmethod
     def __read__(fp, _hash, target=None):
@@ -40,12 +43,6 @@ class Visualize():
         except Exception:
             return None
 
-    def __curve__(self, _hash, metrics_name):
-        for _dict in self.__read__(fp=self.log_fp, _hash=_hash, target=metrics_name):
-            x = float(_dict['epoch'])+float(_dict['iter'])/float(_dict['total_iter'])
-            y = float(_dict['value'])
-            yield x, y
-
     @staticmethod
     def __smooth__(scalar, weight=0.7):
         last = scalar[0]
@@ -56,24 +53,28 @@ class Visualize():
             last = smoothed_val
         return smoothed
 
-    def curve(self, _hash, metrics_name, legend=None, smooth=0):
-        data = [(x, y) for x, y in self.__curve__(_hash, metrics_name)]
-        data_x, data_y = zip(*data)
-        if legend is None:
-            legend = f'{metrics_name}@{_hash}'
-        description = {
-            'metrics_name': metrics_name,
-            '_hash': _hash,
-            'legend': legend,
-        }
-        self.data.append({
-            'data_x': data_x,
-            'data_y': self.__smooth__(data_y, weight=smooth),
-            'description': description,
-        })
-        return self
+    def _read_curve(self, _hash, metrics_name):
+        for _dict in self.__read__(fp=self.log_fp, _hash=_hash, target=metrics_name):
+            x = float(_dict['epoch'])+float(_dict['iter'])/float(_dict['total_iter'])
+            y = float(_dict['value'])
+            yield x, y
 
-    def __plotcurve__(self, axis_type, **kwargs):
+    def _clean_cache(self):
+        """
+            clean cache dir.
+        """
+        if os.path.exists(self.cache_dir):
+            shutil.rmtree(self.cache_dir)
+        os.mkdir(self.cache_dir)
+        print(f'cache dir {self.cache_dir} cleaned.')
+
+    def _check_dtype(self, dtype):
+        if self.dtype != dtype and len(self.data) > 0:
+            print('push failed, clear stack first.')
+            raise NotImplementedError
+        self.dtype = dtype
+
+    def _plot_curve(self, axis_type, **kwargs):
         if axis_type == 'plt':
             if 'plt' not in self.legends:
                 self.legends['plt'] = []
@@ -98,9 +99,26 @@ class Visualize():
                     self.legends['acc_ax'].append(description['legend'])
                     self.acc_ax.plot(data_x, data_y, **kwargs)
 
+    def import_curve(self, _hash, metrics_name, legend=None, smooth=0):
+        self._check_dtype('curve')
+        data = [(x, y) for x, y in self._read_curve(_hash, metrics_name)]
+        data_x, data_y = zip(*data)
+        if legend is None:
+            legend = f'{metrics_name}@{_hash}'
+        description = {
+            'metrics_name': metrics_name,
+            '_hash': _hash,
+            'legend': legend,
+        }
+        self.data.append({
+            'data_x': data_x,
+            'data_y': self.__smooth__(data_y, weight=smooth),
+            'description': description,
+        })
+        return self
+
     def plot(self, **kwargs):
-        if type(self.data) is list:
-            self.__plotcurve__(axis_type=self.axis_type, **kwargs)
+        self._plotcurve(axis_type=self.axis_type, **kwargs)
         self.data = []
         return self
 
@@ -109,22 +127,29 @@ class Visualize():
             save image to path.
             Args:
                 path:
+                **args(for image only):
         """
-        if self.axis_type == 'plt':
-            plt.legend(self.legends['plt'])
-        elif self.axis_type == 'twinx':
-            self.acc_ax.legend(self.legends['acc_ax'])
-            self.loss_ax.legend(self.legends['loss_ax'])
-        self.legends = {}
-        plt.show()
-        plt.savefig(path, pad_inches=0)
-        print(f'saved as {path}')
+        if self.dtype == 'image':
+            for image_idx, (d, annotation) in enumerate(self.data):
+                savefig(d, f'{path}/{image_idx}.png', annotation=annotation)
+            self.data = []
+        elif self.dtype == 'curve':
+            if self.axis_type == 'plt':
+                plt.legend(self.legends['plt'])
+            elif self.axis_type == 'twinx':
+                self.acc_ax.legend(self.legends['acc_ax'])
+                self.loss_ax.legend(self.legends['loss_ax'])
+            self.legends = {}
+            plt.show()
+            plt.savefig(path, pad_inches=0)
+            print(f'saved as {path}')
         return self
 
     def clear(self):
         """
             clear plt canvas.
         """
+        self._clean_cache()
         plt.close('all')
 
     def twinx(self):
@@ -138,15 +163,21 @@ class Visualize():
         self.loss_ax = loss_ax
         return self
 
-    # --------------------------------unimplemented below --------------------------------------------
+    def import_image(self, x, annotation='NA'):
+        """
+            read tensor as image,
+            1-dim tensors are displayed as heatmap, see heatmap().
+            Args:
+                x: input tensor.
+        """
+        self._check_dtype('image')
+        if x.shape[0] == 1:
+            self.data.append((heatmap(x), annotation))
+        else:
+            self.data.append((tensor2img(x), annotation))
+        return self
 
-    @staticmethod
-    def __imshow__(x, size=(448, 448), annotation=''):
-        fig = plt.gcf()  # generate outputs
-        plt.imshow(x, aspect='equal'), plt.axis('off'), fig.set_size_inches(size[1]*12/300.0, size[0]*12/300.0)
-        plt.gca().xaxis.set_major_locator(plt.NullLocator()), plt.gca().yaxis.set_major_locator(plt.NullLocator()), plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0, wspace=0), plt.margins(0, 0)
-        plt.text(0, 0, annotation, color='white', size=4, ha="left", va="top", bbox=dict(boxstyle="square", ec='black', fc='black'))
-        # plt.savefig(path, dpi=300, pad_inches=0)    # visualize masked image
+    # --------------------------------unimplemented below --------------------------------------------
 
     @staticmethod
     def __rmdupcurve__(x, idx):
@@ -158,71 +189,61 @@ class Visualize():
             new_x.append((epoch, data))
         return new_x
 
-    def from_tensor(self, x):
-        """
-            read tensor as image,
-            1-dim tensors are displayed as heatmap, see __heatmap__().
-            Args:
-                x: input tensor.
-        """
-        if x.shape[0] == 1:
-            self.data.append(self.__heatmap__(x))
+
+def savefig(x, path, size=(448, 448), annotation=''):
+    fig = plt.gcf()  # generate outputs
+    plt.imshow(x, aspect='equal'), plt.axis('off'), fig.set_size_inches(size[1]*12/300.0, size[0]*12/300.0)
+    plt.gca().xaxis.set_major_locator(plt.NullLocator()), plt.gca().yaxis.set_major_locator(plt.NullLocator()), plt.subplots_adjust(top=1, bottom=0, left=0, right=1, hspace=0, wspace=0), plt.margins(0, 0)
+    plt.text(0, 0, annotation, color='white', size=4, ha="left", va="top", bbox=dict(boxstyle="square", ec='black', fc='black'))
+    plt.savefig(path, dpi=300, pad_inches=0)    # visualize masked image
+
+
+def heatmap(x):
+    heatmap = x[0].cpu().numpy()
+    heatmap = heatmap/np.max(heatmap)
+    # must convert to type unit8
+    heatmap = np.uint8(255 * heatmap)
+    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+    return heatmap
+
+
+def tensor2img(x, imtype=np.uint8):
+    """"将tensor的数据类型转成numpy类型，并反归一化.
+
+    Parameters:
+        input_image (tensor) --  输入的图像tensor数组
+        imtype (type)        --  转换后的numpy的数据类型
+    """
+    mean = [0.485, 0.456, 0.406]
+    std = [0.229, 0.224, 0.225]
+
+    if not isinstance(x, np.ndarray):
+        if isinstance(x, torch.Tensor):  # get the data from a variable
+            image_tensor = x.data
         else:
-            self.data.append(self.__tensor2img__(x))
-        return self
+            return x
+        image_numpy = image_tensor.cpu().float().numpy()  # convert it into a numpy array
+        if image_numpy.shape[0] == 1:  # grayscale to RGB
+            image_numpy = np.tile(image_numpy, (3, 1, 1))
+        for i in range(len(mean)):
+            image_numpy[i] = image_numpy[i] * std[i] + mean[i]
+        image_numpy = image_numpy * 255
+        image_numpy = np.transpose(image_numpy, (1, 2, 0))  # post-processing: tranpose and scaling
+    else:  # if it is a numpy array, do nothing
+        image_numpy = x
+    return image_numpy.astype(imtype)
 
-    @staticmethod
-    def __heatmap__(x):
-        heatmap = x[0].cpu().numpy()
-        heatmap = heatmap/np.max(heatmap)
-        # must convert to type unit8
-        heatmap = np.uint8(255 * heatmap)
-        heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-        return heatmap
 
-    @staticmethod
-    def __tensor2img__(x, imtype=np.uint8):
-        """"将tensor的数据类型转成numpy类型，并反归一化.
-
-        Parameters:
-            input_image (tensor) --  输入的图像tensor数组
-            imtype (type)        --  转换后的numpy的数据类型
-        """
-        mean = [0.485, 0.456, 0.406]
-        std = [0.229, 0.224, 0.225]
-
-        if not isinstance(x, np.ndarray):
-            if isinstance(x, torch.Tensor):  # get the data from a variable
-                image_tensor = x.data
-            else:
-                return x
-            image_numpy = image_tensor.cpu().float().numpy()  # convert it into a numpy array
-            if image_numpy.shape[0] == 1:  # grayscale to RGB
-                image_numpy = np.tile(image_numpy, (3, 1, 1))
-            for i in range(len(mean)):
-                image_numpy[i] = image_numpy[i] * std[i] + mean[i]
-            image_numpy = image_numpy * 255
-            image_numpy = np.transpose(image_numpy, (1, 2, 0))  # post-processing: tranpose and scaling
-        else:  # if it is a numpy array, do nothing
-            image_numpy = x
-        return image_numpy.astype(imtype)
-
-    def __makegif__(self, from_dir='build/cache', fp='build/test.gif'):
-        """
-            not implemented yet.
-        """
-        # gif_images = [imageio.imread(f'{from_dir}/{img_file}') for img_file in files]
-        # imageio.mimsave(fp, gif_images, fps=8)
-        raise NotImplementedError
-
-    @staticmethod
-    def _clean_cache(target_dir='build/cache'):
-        """
-            clean cache dir. (can be dangerous)
-            Args:
-                target_dir:
-        """
-        if os.path.exists(target_dir):
-            shutil.rmtree(target_dir)
-        os.mkdir(target_dir)
-        print(f'cache dir {target_dir} cleaned.')
+def makegif(self, from_dir='build/cache', fp='build/test.gif', sort_func=lambda x: x, reverse=False):
+    """
+        make gif from images.
+        Args:
+            from_dir:
+            fp:
+            sort_func:
+    """
+    files = [x for x in os.listdir(from_dir) if x.endswith('jpg') or x.endswith('png')]
+    gif_images = [imageio.imread(f'{from_dir}/{img_file}') for img_file in files]
+    gif_images.sort(sort_func, reverse=reverse)
+    imageio.mimsave(fp, gif_images, fps=8)
+    return fp

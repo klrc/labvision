@@ -337,6 +337,7 @@ class AutoControl():
                 val_interval:
                 auto_log:
         """
+        
         train_generator = self.__train__(yield_batches=interval, start_epoch=self.status.epoch())
         val_generator = self.__val__(yield_batches=val_interval)
 
