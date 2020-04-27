@@ -118,7 +118,7 @@ class Visualize():
         return self
 
     def plot(self, **kwargs):
-        self._plotcurve(axis_type=self.axis_type, **kwargs)
+        self._plot_curve(axis_type=self.axis_type, **kwargs)
         self.data = []
         return self
 
