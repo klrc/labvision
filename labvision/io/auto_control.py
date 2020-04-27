@@ -58,9 +58,11 @@ class Status():
 
 class AutoControl():
 
-    def __init__(self, dataset, model,
+    def __init__(self,
+                 dataset,
+                 model,
                  dataset_transforms=None, dataset_args={},
-                 optimizer=torch.optim.SGD, optimizer_args={},
+                 optimizer=None,
                  loss_func=None, **fpargs):
         """
             automatic train/eval/stop controller for torch.nn.Module,
@@ -109,7 +111,7 @@ class AutoControl():
 
         self._init_datasets(dataset, dataset_transforms, **dataset_args)
         self.model = model
-        self._init_optimizer(optimizer, **optimizer_args)
+        self._init_optimizer(optimizer)
         self.fps = self._check_fpargs(**fpargs)
         self.status = Status()
         self.under_test = False
@@ -248,12 +250,10 @@ class AutoControl():
         self.valloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
         self.testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
-    def _init_optimizer(self, optimizer, **args):
-        if 'params' not in args:
-            args['params'] = self.model.parameters()
-        if 'lr' not in args:
-            args['lr'] = 1e-3
-        self.optimizer = optimizer(**args)
+    def _init_optimizer(self, optimizer):
+        if optimizer is None:
+            optimizer = torch.optim.SGD(params=self.model.parameters(), lr=1e-3)
+        self.optimizer = optimizer
 
     def load_status(self, fp, recover_optimizer=False):
         """
@@ -337,7 +337,7 @@ class AutoControl():
                 val_interval:
                 auto_log:
         """
-        
+
         train_generator = self.__train__(yield_batches=interval, start_epoch=self.status.epoch())
         val_generator = self.__val__(yield_batches=val_interval)
 
@@ -408,6 +408,5 @@ if __name__ == "__main__":
         labvision.datasets.FI,
         torchvision.models.resnet50(pretrained=True),
         dataset_transforms=transforms,
-        optimizer_args={'lr': 1e-3, 'weight_decay': 5e-4},
         loss_func=lambda logits, y: torch.nn.functional.cross_entropy(logits, y)
     )

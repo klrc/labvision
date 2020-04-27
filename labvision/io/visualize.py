@@ -131,7 +131,7 @@ class Visualize():
         """
         if self.dtype == 'image':
             for image_idx, (d, annotation) in enumerate(self.data):
-                savefig(d, f'{path}/{image_idx}.png', annotation=annotation)
+                savefig(d, f'{path}/{image_idx}.png', size=(d.shape[0], d.shape[1]), annotation=annotation)
             self.data = []
         elif self.dtype == 'curve':
             if self.axis_type == 'plt':
