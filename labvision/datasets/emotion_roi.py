@@ -6,15 +6,21 @@ def __maxidx__(_list):
 
 
 class EmotionROI(Dataset):
-    label_types = ['single', 'distribution', 'va']
+    dataset_labels = ['single', 'distribution', 'va']
 
-    def __init__(self, root='external/EmotionROI', train=True, transform=None):
-        super().__init__(root, train, transform)
+    def __init__(self, root='external/EmotionROI', **kwargs):
+        super().__init__(root, **kwargs)
 
-    def __loadtarget__(self, root):
-        for x in self.__readgt__(root, spliter='\t'):
+    def __readgt__(self, root):
+        return super().__readgt__(root, spliter='\t')
+
+    def load_label(self, root):
+        for x in self.__readgt__(root):
             y1 = [float(_str.replace('\n', '')) for _str in x[3:]]
             y2 = [float(_str.replace('\n', '')) for _str in x[1:3]]
-            self.ys['single'].append(__maxidx__(y1))
-            self.ys['distribution'].append(y1)
-            self.ys['va'].append(y2)
+            if 'single' in self.ys.keys():
+                self.ys['single'].append(__maxidx__(y1))
+            if 'distribution' in self.ys.keys():
+                self.ys['distribution'].append(y1)
+            if 'va' in self.ys.keys():
+                self.ys['va'].append(y2)

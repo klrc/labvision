@@ -143,13 +143,13 @@ class Visualize():
             plt.show()
             plt.savefig(path, pad_inches=0)
             print(f'saved as {path}')
+        self.clear()
         return self
 
     def clear(self):
         """
             clear plt canvas.
         """
-        self._clean_cache()
         plt.close('all')
 
     def twinx(self):
@@ -234,7 +234,7 @@ def tensor2img(x, imtype=np.uint8):
     return image_numpy.astype(imtype)
 
 
-def makegif(self, from_dir='build/cache', fp='build/test.gif', sort_func=lambda x: x, reverse=False):
+def makegif(from_dir='build/cache', fp='build/test.gif', sort_func=lambda x: x, reverse=False, fps=8):
     """
         make gif from images.
         Args:
@@ -243,7 +243,8 @@ def makegif(self, from_dir='build/cache', fp='build/test.gif', sort_func=lambda 
             sort_func:
     """
     files = [x for x in os.listdir(from_dir) if x.endswith('jpg') or x.endswith('png')]
+    files.sort(key=sort_func, reverse=reverse)
     gif_images = [imageio.imread(f'{from_dir}/{img_file}') for img_file in files]
-    gif_images.sort(sort_func, reverse=reverse)
-    imageio.mimsave(fp, gif_images, fps=8)
+    imageio.mimsave(fp, gif_images, fps=fps)
     return fp
+

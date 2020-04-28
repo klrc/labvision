@@ -3,7 +3,6 @@ import numpy as np
 import random
 from .utils import Dataset
 import json
-from torch.autograd import Variable
 
 
 def __maxidx__(_list):
@@ -11,12 +10,12 @@ def __maxidx__(_list):
 
 
 class FI(Dataset):
-    def __init__(self, root='external/FI', train=True, transform=None):
-        super().__init__(root, train, transform)
+    def __init__(self, root='external/FI', **kwargs):
+        super().__init__(root, **kwargs)
 
-    def __gensplit__(self, root, img_dir='images', seed=0):
-        np.random.seed(seed)
-        _list = [x for x in os.listdir(f'{root}/{img_dir}')]
+    def __gensplit__(self, root):
+        np.random.seed(self.seed)
+        _list = [x for x in os.listdir(f'{root}/{self.img_dir}')]
         random.shuffle(_list)
         data = {}
         for x in _list:
@@ -35,18 +34,12 @@ class FI(Dataset):
         with open(f'{root}/split.json', 'w') as f:
             json.dump(_dict, f)
 
-    def __loadtarget__(self, root, spliter=' ', start_line=1):
+    def load_label(self, root, spliter=' ', start_line=1):
         labels = ['amusement', 'awe', 'contentment', 'excitement', 'anger', 'disgust', 'fear', 'sadness']
         for x in self.data:
             label = x.split('/')[-1].split('_')[0]
             y = [1 if _str == label else 0 for _str in labels]
-            self.ys['single'].append(__maxidx__(y))
-            self.ys['distribution'].append(y)
-
-    @staticmethod
-    def __readsingle__(sample):
-        """
-            4 autocontrol*
-        """
-        x, (y, _) = sample
-        return Variable(x).cuda(), Variable(y).cuda()
+            if 'single' in self.ys.keys():
+                self.ys['single'].append(__maxidx__(y))
+            if 'distribution' in self.ys.keys():
+                self.ys['distribution'].append(y)
