@@ -1,7 +1,11 @@
-import labvision.transforms as transforms
 import labvision
+import torchvision
 
 
-root = '/home/sh/Desktop/Research/external/Flickr_LDL'
-emod = labvision.datasets.FlickrLDL(root=root)
-print(emod.__getitem__(5))
+labvision.io.cpu.limit(10)
+core = labvision.auto.compile(model=torchvision.models.resnet18().cuda(),
+                       datasets=dict(dataset_class=labvision.datasets.FI,
+                                     args={'root': '/home/sh/Desktop/Research/external/FI'}))
+
+for x in core.step():
+    print(x)

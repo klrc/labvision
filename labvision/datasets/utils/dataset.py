@@ -77,12 +77,13 @@ class Dataset(data.Dataset):
         for key in self.ys.keys():
             self.ys[key] = torch.from_numpy(np.array(self.ys[key]))
 
-    def __cvimg__(self, path):
+    def __cvimg__(self, path, convert2rgb=True):
         """
             read image in RGB mode.
         """
         img_cv = cv2.imread(path)
-        img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
+        if convert2rgb:
+            img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
         return img_cv
 
     def __getitem__(self, index):

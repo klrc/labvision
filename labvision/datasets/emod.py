@@ -3,7 +3,7 @@ import torch
 import numpy as np
 
 from .utils import Dataset
-from labvision.transforms import casnet_fixation_transform
+from labvision.transforms.casnet_cvpr_2018 import casnet_fixation_transform
 
 
 def __maxidx__(_list):
@@ -33,13 +33,19 @@ class EMOd(Dataset):
     def __getitem__(self, index):
         img, target = super().__getitem__(index)
         if 'eyetrack' in self.ys.keys():
-            i = self.ys.keys().index('eyetrack')
-            _eyetrack = target[i]
-            _eyetrack = self.__cvimg__(_eyetrack)
-            _eyetrack = self.mask_transform(_eyetrack)
-            print(_eyetrack.shape)
-            _eyetrack = torch.mean(_eyetrack, dim=0)
-            target[i] = _eyetrack
+            if len(self.ys.keys()) > 1:
+                i = [x for x in self.ys.keys()].index('eyetrack')
+                _eyetrack = target[i]
+                _eyetrack = self.__cvimg__(_eyetrack)
+                _eyetrack = self.mask_transform(_eyetrack)
+                _eyetrack = torch.mean(_eyetrack, dim=0)
+                target[i] = _eyetrack
+            else:
+                _eyetrack = target
+                _eyetrack = self.__cvimg__(_eyetrack)
+                _eyetrack = self.mask_transform(_eyetrack)
+                _eyetrack = torch.mean(_eyetrack, dim=0)
+                target = _eyetrack
         return img, target
 
     def init_mask_transform(self, transform):
