@@ -11,7 +11,7 @@ from setuptools import setup, find_packages  # 这个包没有的可以pip一下
 
 setup(
     name="labvision",  # 这里是pip项目发布的名称
-    version="0.1.9",  # 版本号，数值大的会优先被pip
+    version="0.1.11",  # 版本号，数值大的会优先被pip
     keywords=("pip", "labvision", "ecust"),
     description="ecust vision lab platform",
     long_description="experimental platform for CV research.",
