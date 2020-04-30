@@ -1,11 +1,13 @@
 import labvision
-import torchvision
+# import torchvision
 
 
-labvision.io.cpu.limit(10)
-core = labvision.auto.compile(model=torchvision.models.resnet18().cuda(),
-                       datasets=dict(dataset_class=labvision.datasets.FI,
-                                     args={'root': '/home/sh/Desktop/Research/external/FI'}))
+# labvision.io.cpu.limit(10)
+# core = labvision.auto.compile(model=torchvision.models.resnet18().cuda(),
+#                               datasets=dict(dataset_class=labvision.datasets.FI,
+#                                             args={'root': '/home/sh/Desktop/Research/external/FI'}))
+core = labvision.auto.resume('NovhVIyW.freeze')
+# for model, status in core.step():
+#     core.metrics(['acc@top1', 'acc@top2'])
 
-for x in core.step():
-    print(x)
+core.check()

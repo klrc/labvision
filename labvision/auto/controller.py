@@ -1,12 +1,11 @@
 import numpy as np
-import json
-import os
 import random
 import string
 import time
 
 import torch
 from torch.autograd import Variable
+from .utils import metrics as metrics_functional
 
 
 class Status():
@@ -25,6 +24,7 @@ class Status():
             generates a hash with ASCII letters and digits,
             always starts with a letter (for markdown usage).
         """
+        random.seed()
         _hash_head = ''.join(random.sample(string.ascii_letters, 1))
         _hash_body = ''.join(random.sample(string.ascii_letters+string.digits, 7))
         return _hash_head+_hash_body
@@ -47,7 +47,7 @@ class Status():
         return self.status_dict['hash']
 
 
-class Evolution():
+class AutoControl():
     def __init__(self, config):
         self.config = config
         self._compile(config)
@@ -121,13 +121,16 @@ class Evolution():
                 loss = self.loss_function(logits, y)
         return loss.item()
 
-    def __log__(self, msg, display=True):
+    def __log__(self, msg, display=True, pure_log=False):
         """
             Args:
                 msg:
                 display:
         """
-        line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}]<{self.status.hash()}>\t'+msg
+        if pure_log:
+            line = f'pure# {msg}'
+        else:
+            line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}]<{self.status.hash()}>\t'+msg
         if self.under_test:
             line = f'testing# {line}'
         open(self.config['log_file_path'], 'a').write(line+'\n')
@@ -150,6 +153,8 @@ class Evolution():
         np.random.seed(seed)  # numpy
         random.seed(seed)  # random and transforms
         torch.backends.cudnn.deterministic = True  # cudnn
+        # https://zhuanlan.zhihu.com/p/76472385
+        # torch.backends.cudnn.benchmark = False
 
     def _init_optimizer(self, optimizer):
         self.optimizer = optimizer
@@ -169,17 +174,16 @@ class Evolution():
         self.testloader = torch.utils.data.DataLoader(valset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     def _compile(self, config):
-        random.seed()
-        self.status = Status()  # gen hash before init seed
-        self._init_seed(config['seed'])
+        self.status = Status(config['frozen_status'])
         self.model = config['model']
+        self._init_seed(config['seed'])
         self._init_optimizer(config['optimizer'])
         self._init_dataloader(**config['datasets'])
 
     def step(self, interval=1, val_interval=4, auto_log=True):
         """
-            step to the next checkpoint,
-            works as a generator.
+            step to the next checkpoint, works as a generator.
+            yields: model, status
 
             Args:
                 interval:
@@ -225,10 +229,64 @@ class Evolution():
         """
         return self.model(x)
 
-    def freeze(self):
-        raise NotImplementedError
+    def freeze(self, fp=None):
+        self.config['frozen_status'] = self.status.status_dict
+        if fp is None:
+            fp = f'{self.config["build_dir"]}/{self.status.hash()}.freeze'
+        torch.save(self.config, fp)
+        return fp
 
-    def load(self):
+    def __eval__(self, logits, y, _type):
+        _arg = None
+        if '@' in _type:
+            _type, _arg = _type.split('@')
+        if _type == 'acc':
+            if _arg is None:
+                k = 1
+            else:
+                k = int(_arg.split('top')[-1])
+            return metrics_functional.acc_topk(logits, y, ks=(k,))
+
+    def check(self):
+        """
+            check if autocontrol will work properly,
+            all loops are cut for 1 loop only in this mode,
+            also logs are annotated to be disabled for visualize.
+        """
+        self.under_test = True
+        self.__log__('testing ..')
+        self.__log__(self.__str__())
+        _ = next(self.step(interval=1, val_interval=1))
+        self.__log__('test passed.')
+        self.under_test = False
+
+    def metrics(self, types='acc@top3', auto_log=True):
+        '''
+            supported types: acc@topk,
+        '''
+        if type(types) is str:
+            types = [types]
+        for t in types:
+            assert t.split('@')[0] in ['acc']
+        self.model.eval()
+        metrics = {}
+        with torch.no_grad():
+            for sample in self.testloader:
+                x, y = self.__read__(sample)
+                logits = self.forward(x)
+                for _type in types:
+                    batch_metrics = self.__eval__(logits, y, _type)
+                    for key in batch_metrics:
+                        if key not in metrics:
+                            metrics[key] = 0
+                        metrics[key] += batch_metrics[key]/len(self.testloader)
+                if self.under_test:
+                    break
+        if auto_log:
+            self.log(metrics)
+        return metrics
+
+    def summary(self):
         raise NotImplementedError
 
     @staticmethod

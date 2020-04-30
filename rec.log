@@ -2,3 +2,41 @@
 [2020-04-28 23:14:16]<qkEsw0O3>	[0,     1/290] val_loss: 6.898854494094849
 [2020-04-28 23:14:22]<qkEsw0O3>	[0,     2/290] train_loss: 7.0626115798950195
 [2020-04-28 23:14:22]<qkEsw0O3>	[0,     2/290] val_loss: 6.921056270599365
+[2020-04-29 22:22:22]<DCu6jp9P>	[0,     1/290] train_loss: 7.0436177253723145
+[2020-04-29 22:22:22]<DCu6jp9P>	[0,     1/290] val_loss: 6.919435381889343
+[2020-04-29 22:44:15]<NovhVIyW>	[0,     1/290] train_loss: 7.113069534301758
+[2020-04-29 22:44:15]<NovhVIyW>	[0,     1/290] val_loss: 6.9018837213516235
+[2020-04-29 23:13:03]<BAkTPjSY>	[0,     1/290] train_loss: 6.880928993225098
+[2020-04-29 23:13:03]<BAkTPjSY>	[0,     1/290] val_loss: 6.87236475944519
+[2020-04-29 23:13:33]<NI5QoFbp>	[0,     1/290] train_loss: 6.865640640258789
+[2020-04-29 23:13:33]<NI5QoFbp>	[0,     1/290] val_loss: 6.844695568084717
+[2020-04-29 23:14:18]<NI5QoFbp>	[0,     1/290] acc@top1: 0.007211538461538459
+[2020-04-29 23:14:18]<NI5QoFbp>	[0,     1/290] acc@top2: 0.01983173076923077
+[2020-04-29 23:14:24]<NI5QoFbp>	[0,     2/290] train_loss: 6.707878589630127
+[2020-04-29 23:14:24]<NI5QoFbp>	[0,     2/290] val_loss: 6.853789210319519
+[2020-04-29 23:17:56]<NovhVIyW>	[0,     1/290] train_loss: 7.0386457443237305
+[2020-04-29 23:17:56]<NovhVIyW>	[0,     1/290] val_loss: 6.88742196559906
+[2020-04-29 23:19:09]<NovhVIyW>	[0,     1/290] continue from: NovhVIyW.freeze
+[2020-04-29 23:19:17]<NovhVIyW>	[0,     1/290] train_loss: 7.0386457443237305
+[2020-04-29 23:19:17]<NovhVIyW>	[0,     1/290] val_loss: 6.88742196559906
+[2020-04-29 23:20:04]<NovhVIyW>	[0,     1/290] acc@top1: 0.0
+[2020-04-29 23:20:04]<NovhVIyW>	[0,     1/290] acc@top2: 0.0
+[2020-04-29 23:20:10]<NovhVIyW>	[0,     2/290] train_loss: 6.8356709480285645
+[2020-04-29 23:20:10]<NovhVIyW>	[0,     2/290] val_loss: 6.8556740283966064
+[2020-04-29 23:20:41]<NovhVIyW>	[0,     1/290] continue from: NovhVIyW.freeze
+testing# [2020-04-29 23:20:41]<NovhVIyW>	testing ..
+testing# [2020-04-29 23:20:41]<NovhVIyW>	<labvision.auto.controller.AutoControl object at 0x7f83e0b7f978>
+testing# [2020-04-29 23:20:46]<NovhVIyW>	[0,     1/290] train_loss: 7.0386457443237305
+testing# [2020-04-29 23:20:46]<NovhVIyW>	[0,     1/290] val_loss: 6.892633438110352
+[2020-04-29 23:21:32]<NovhVIyW>	[0,     1/290] continue from: NovhVIyW.freeze
+testing# [2020-04-29 23:21:32]<NovhVIyW>	testing ..
+testing# [2020-04-29 23:21:32]<NovhVIyW>	<labvision.auto.controller.AutoControl object at 0x7f49ee590940>
+testing# [2020-04-29 23:21:37]<NovhVIyW>	[0,     1/290] train_loss: 7.0386457443237305
+testing# [2020-04-29 23:21:37]<NovhVIyW>	[0,     1/290] val_loss: 6.892633438110352
+testing# [2020-04-29 23:21:37]<NovhVIyW>	test passed.
+pure# continue from: NovhVIyW.freeze
+testing# [2020-04-29 23:25:09]<NovhVIyW>	testing ..
+testing# [2020-04-29 23:25:09]<NovhVIyW>	<labvision.auto.controller.AutoControl object at 0x7f0ccc14d710>
+testing# [2020-04-29 23:25:14]<NovhVIyW>	[0,     1/290] train_loss: 7.0386457443237305
+testing# [2020-04-29 23:25:14]<NovhVIyW>	[0,     1/290] val_loss: 6.892633438110352
+testing# [2020-04-29 23:25:14]<NovhVIyW>	test passed.
