@@ -8,6 +8,10 @@ class Graph():
         self.log_fp = log_fp
         self.data = []
 
+    def refresh(self):
+        self.data = []
+        refresh()
+
     @staticmethod
     def __smooth__(xs, weight=0.7):
         for i in range(int(10*weight)+1):
