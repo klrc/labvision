@@ -79,7 +79,7 @@ def compile(config=None, read_frozen_status=False, **kwargs):
         datasets['trainset'] = trainset
         datasets['testset'] = testset
     num_workers = datasets['num_workers']
-    num_workers = min(num_workers, labvision.io.cpu.num_workers_limit)
+    num_workers = min(num_workers, labvision.io.backends.device.cpu_num_workers_limit)
     datasets['num_workers'] = num_workers
 
     # load frozen status

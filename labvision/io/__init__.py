@@ -1,7 +1,4 @@
-from .utils import clean, check_dirs, pack, deploy
-from . import gpu
-from . import storage
-from . import cpu
+from .utils import file_utils as utils
+from . import remote
 
-__all__ = ['clean', 'check_dirs', 'pack', 'deploy',
-           'gpu', 'storage', 'cpu']
+__all__ = ['utils', 'remote']

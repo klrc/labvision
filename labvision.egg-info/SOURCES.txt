@@ -21,9 +21,10 @@ labvision/datasets/utils/__init__.py
 labvision/datasets/utils/dataset.py
 labvision/datasets/utils/exceptions.py
 labvision/io/__init__.py
-labvision/io/cpu/__init__.py
-labvision/io/gpu/__init__.py
-labvision/io/storage/__init__.py
+labvision/io/remote.py
+labvision/io/backends/__init__.py
+labvision/io/backends/device.py
+labvision/io/backends/ssh.py
 labvision/io/utils/__init__.py
 labvision/io/utils/file_utils.py
 labvision/models/__init__.py
