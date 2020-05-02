@@ -1,2 +1,4 @@
 .vscode
 .pypirc
+__pycache__
+build
