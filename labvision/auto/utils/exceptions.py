@@ -1,4 +1,4 @@
-class ConfigCheckFailedException(Exception):
+class ExceptionMessage(Exception):
     def __init__(self, msg):
         super().__init__()
         self.msg = msg
@@ -7,7 +7,7 @@ class ConfigCheckFailedException(Exception):
         return f'{self.msg}'
 
 
-class MissingKeyException(ConfigCheckFailedException):
+class MissingArgsException(ExceptionMessage):
     def __init__(self, key, msg):
         msg = f'Missing key \'{key}\' in config\n({msg})'
         super().__init__(msg)

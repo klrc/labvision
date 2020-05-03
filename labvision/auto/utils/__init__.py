@@ -1,4 +1,4 @@
-from .exceptions import ConfigCheckFailedException, MissingKeyException
+from .exceptions import ExceptionMessage, MissingArgsException
 from . import metrics
 
-__all__ = ['ConfigCheckFailedException', 'MissingKeyException', 'metrics']
+__all__ = ['ExceptionMessage', 'MissingArgsException', 'metrics']

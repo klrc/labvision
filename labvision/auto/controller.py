@@ -133,7 +133,7 @@ class AutoControl():
             line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}]<{self.status.hash()}>\t'+msg
         if self.under_test:
             line = f'testing# {line}'
-        open(self.config['log_file_path'], 'a').write(line+'\n')
+        open(self.config.log_path, 'a').write(line+'\n')
         if display:
             print(line)
         return self
@@ -159,7 +159,7 @@ class AutoControl():
     def _init_optimizer(self, optimizer):
         self.optimizer = optimizer
 
-    def _init_dataloader(self, trainset, testset, valset, batch_size=32, num_workers=2, **kwargs):
+    def _init_dataloader(self, datasets):
         """
             Args:
                 trainset:
@@ -167,18 +167,16 @@ class AutoControl():
                 batch_size:
                 num_workers:
         """
-        if valset is None:
-            valset = testset
-        self.trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-        self.valloader = torch.utils.data.DataLoader(testset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-        self.testloader = torch.utils.data.DataLoader(valset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+        self.trainloader = torch.utils.data.DataLoader(datasets.trainset, batch_size=datasets.batch_size, shuffle=True, num_workers=datasets.num_workers)
+        self.valloader = torch.utils.data.DataLoader(datasets.testset, batch_size=datasets.batch_size, shuffle=True, num_workers=datasets.num_workers)
+        self.testloader = torch.utils.data.DataLoader(datasets.valset, batch_size=datasets.batch_size, shuffle=False, num_workers=datasets.num_workers)
 
     def _compile(self, config):
-        self.status = Status(config['frozen_status'])
-        self.model = config['model']
-        self._init_seed(config['seed'])
-        self._init_optimizer(config['optimizer'])
-        self._init_dataloader(**config['datasets'])
+        self.status = Status(config.status)
+        self.model = config.model
+        self._init_seed(config.seed)
+        self._init_optimizer(config.optimizer)
+        self._init_dataloader(config.datasets)
 
     def step(self, interval=1, val_interval=4, auto_log=True):
         """
@@ -230,10 +228,11 @@ class AutoControl():
         return self.model(x)
 
     def freeze(self, fp=None):
-        self.config['frozen_status'] = self.status.status_dict
+        self.config.status = self.status.status_dict
         if fp is None:
-            fp = f'{self.config["build_dir"]}/{self.status.hash()}.freeze'
-        torch.save(self.config, fp)
+            fp = f'{self.config.build_dir}/{self.status.hash()}.freeze'
+        torch.save(self.config.freeze(), fp)
+        self.log(f'status saved as {fp}')
         return fp
 
     def __eval__(self, logits, y, _type):

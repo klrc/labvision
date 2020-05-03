@@ -40,3 +40,69 @@ testing# [2020-04-29 23:25:09]<NovhVIyW>	<labvision.auto.controller.AutoControl 
 testing# [2020-04-29 23:25:14]<NovhVIyW>	[0,     1/290] train_loss: 7.0386457443237305
 testing# [2020-04-29 23:25:14]<NovhVIyW>	[0,     1/290] val_loss: 6.892633438110352
 testing# [2020-04-29 23:25:14]<NovhVIyW>	test passed.
+testing# [2020-05-03 10:09:14]<Vz2Pl3u6>	testing ..
+testing# [2020-05-03 10:09:14]<Vz2Pl3u6>	<labvision.auto.controller.AutoControl object at 0x7fa3b2479358>
+testing# [2020-05-03 10:11:20]<bzyTl1HE>	testing ..
+testing# [2020-05-03 10:11:20]<bzyTl1HE>	<labvision.auto.controller.AutoControl object at 0x7fc79cb12390>
+testing# [2020-05-03 10:12:47]<XIfp3169>	testing ..
+testing# [2020-05-03 10:12:47]<XIfp3169>	<labvision.auto.controller.AutoControl object at 0x7f2aa6be29b0>
+testing# [2020-05-03 15:10:45]<VS2Cu843>	testing ..
+testing# [2020-05-03 15:10:45]<VS2Cu843>	<labvision.auto.controller.AutoControl object at 0x7fb9e28c6278>
+testing# [2020-05-03 15:13:13]<rCQs60xc>	testing ..
+testing# [2020-05-03 15:13:13]<rCQs60xc>	<labvision.auto.controller.AutoControl object at 0x7fee1cc92278>
+testing# [2020-05-03 15:20:13]<YF9HbN0q>	testing ..
+testing# [2020-05-03 15:20:13]<YF9HbN0q>	<labvision.auto.controller.AutoControl object at 0x7fdd2e4e3160>
+testing# [2020-05-03 15:22:09]<lZ6iEdbT>	testing ..
+testing# [2020-05-03 15:22:09]<lZ6iEdbT>	<labvision.auto.controller.AutoControl object at 0x7f94544fbf98>
+testing# [2020-05-03 15:22:09]<lZ6iEdbT>	[0,     1/938] train_loss: 2.567979574203491
+testing# [2020-05-03 15:22:09]<lZ6iEdbT>	[0,     1/938] val_loss: 2.29194974899292
+testing# [2020-05-03 15:22:09]<lZ6iEdbT>	test passed.
+testing# [2020-05-03 15:22:46]<yIdZwfA4>	testing ..
+testing# [2020-05-03 15:22:46]<yIdZwfA4>	<labvision.auto.controller.AutoControl object at 0x7f779bd24198>
+testing# [2020-05-03 15:22:46]<yIdZwfA4>	[0,     1/938] train_loss: 2.5719316005706787
+testing# [2020-05-03 15:22:46]<yIdZwfA4>	[0,     1/938] val_loss: 2.306183099746704
+testing# [2020-05-03 15:22:46]<yIdZwfA4>	test passed.
+testing# [2020-05-03 15:23:13]<sYzxeF1L>	testing ..
+testing# [2020-05-03 15:23:13]<sYzxeF1L>	<labvision.auto.controller.AutoControl object at 0x7f3b1eddb198>
+testing# [2020-05-03 15:23:14]<sYzxeF1L>	[0,     1/938] train_loss: 2.6956787109375
+testing# [2020-05-03 15:23:14]<sYzxeF1L>	[0,     1/938] val_loss: 2.3048672676086426
+testing# [2020-05-03 15:23:14]<sYzxeF1L>	test passed.
+testing# [2020-05-03 15:23:26]<wGpd02AV>	testing ..
+testing# [2020-05-03 15:23:26]<wGpd02AV>	<labvision.auto.controller.AutoControl object at 0x7f62a171a128>
+testing# [2020-05-03 15:23:26]<wGpd02AV>	[0,     1/938] train_loss: 2.6570160388946533
+testing# [2020-05-03 15:23:26]<wGpd02AV>	[0,     1/938] val_loss: 2.3176910877227783
+testing# [2020-05-03 15:23:26]<wGpd02AV>	test passed.
+testing# [2020-05-03 15:24:57]<D51ubXJ7>	testing ..
+testing# [2020-05-03 15:24:57]<D51ubXJ7>	<labvision.auto.controller.AutoControl object at 0x7f8b97347198>
+testing# [2020-05-03 15:24:57]<D51ubXJ7>	[0,     1/938] train_loss: 2.485806465148926
+testing# [2020-05-03 15:24:57]<D51ubXJ7>	[0,     1/938] val_loss: 2.30884051322937
+testing# [2020-05-03 15:24:57]<D51ubXJ7>	test passed.
+testing# [2020-05-03 15:26:33]<dAaZmDz8>	testing ..
+testing# [2020-05-03 15:26:33]<dAaZmDz8>	<labvision.auto.controller.AutoControl object at 0x7f344398f208>
+testing# [2020-05-03 15:26:33]<dAaZmDz8>	[0,     1/938] train_loss: 2.4921061992645264
+testing# [2020-05-03 15:26:33]<dAaZmDz8>	[0,     1/938] val_loss: 2.3105030059814453
+testing# [2020-05-03 15:26:34]<dAaZmDz8>	test passed.
+testing# [2020-05-03 15:27:31]<YNVw5cu6>	testing ..
+testing# [2020-05-03 15:27:31]<YNVw5cu6>	<labvision.auto.controller.AutoControl object at 0x7f2047d1f0b8>
+testing# [2020-05-03 15:27:31]<YNVw5cu6>	[0,     1/938] train_loss: 2.5685551166534424
+testing# [2020-05-03 15:27:31]<YNVw5cu6>	[0,     1/938] val_loss: 2.379568338394165
+testing# [2020-05-03 15:27:31]<YNVw5cu6>	test passed.
+testing# [2020-05-03 15:28:42]<O3ahFVE2>	testing ..
+testing# [2020-05-03 15:28:42]<O3ahFVE2>	<labvision.auto.controller.AutoControl object at 0x7ff0abdd3208>
+testing# [2020-05-03 15:28:42]<O3ahFVE2>	[0,     1/938] train_loss: 2.40678071975708
+testing# [2020-05-03 15:28:42]<O3ahFVE2>	[0,     1/938] val_loss: 2.314950466156006
+testing# [2020-05-03 15:28:42]<O3ahFVE2>	test passed.
+testing# [2020-05-03 15:32:18]<ergMlvTP>	testing ..
+testing# [2020-05-03 15:32:18]<ergMlvTP>	<labvision.auto.controller.AutoControl object at 0x7f6b3f3482e8>
+testing# [2020-05-03 15:32:18]<ergMlvTP>	[0,     1/938] train_loss: 2.613866090774536
+testing# [2020-05-03 15:32:18]<ergMlvTP>	[0,     1/938] val_loss: 2.3110687732696533
+testing# [2020-05-03 15:32:18]<ergMlvTP>	test passed.
+[2020-05-03 15:32:18]<ergMlvTP>	[0,     1/938] freeze status as build/test.freeze
+pure# continue from: build/test.freeze
+pure# continue from: build/test.freeze
+pure# continue from: build/test.freeze
+testing# [2020-05-03 15:34:16]<ergMlvTP>	testing ..
+testing# [2020-05-03 15:34:16]<ergMlvTP>	<labvision.auto.controller.AutoControl object at 0x7f591332dda0>
+testing# [2020-05-03 15:34:16]<ergMlvTP>	[0,     1/938] train_loss: 2.2500436305999756
+testing# [2020-05-03 15:34:16]<ergMlvTP>	[0,     1/938] val_loss: 2.306716203689575
+testing# [2020-05-03 15:34:16]<ergMlvTP>	test passed.
