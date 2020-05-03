@@ -74,7 +74,6 @@ class Template():
             self.valset = None
             self.batch_size = 64
             self.num_workers = 1
-            self.transform = labvision.transforms.basic.empty_transform
 
         def compile(self):
             reserved = ['trainset', 'testset', 'valset', 'batch_size', 'num_workers']

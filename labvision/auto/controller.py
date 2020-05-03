@@ -69,12 +69,12 @@ class AutoControl():
             epoch += 1
             for i, sample in enumerate(self.trainloader, 0):
                 loss += self.__step__(sample, train=True)
-                if (i+1) % yield_batches == 0:
-                    loss /= yield_batches
-                    epoch_finished = False
-                elif i == len(self.trainloader)-1:
+                if i == len(self.trainloader)-1:
                     loss /= len(self.trainloader) % yield_batches
                     epoch_finished = True
+                elif (i+1) % yield_batches == 0:
+                    loss /= yield_batches
+                    epoch_finished = False
                 else:
                     continue
                 status = {

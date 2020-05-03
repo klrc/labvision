@@ -21,12 +21,19 @@ def pack(source_dir, cache_dir):
     assert 'main.py' in source_files
     check_dir(cache_dir)
     target_fp = f'{cache_dir}/deploy_pack.tar.gz'
+    total = 0
+    for _, _, files in os.walk(source_dir):  # 遍历统计
+        for x in files:
+            total += 1  # 统计文件夹下文件个数
     with tarfile.open(target_fp, "w:gz") as tar:
+        current = 0
         for root, _, files in os.walk(source_dir):
             for fname in files:
+                current += 1
                 pathfile = f'{root}/{fname}'
                 arcpath = f'{root.split(source_dir)[-1]}/{fname}'
                 tar.add(pathfile, arcname=arcpath)
+                print(f'compressing ({current}/{total}): {arcpath}')
     print(f'packing {target_fp}')
     return target_fp
 
@@ -37,7 +44,7 @@ def deploy(src='src', run='main.py', conda_env=None):
     fsize = os.path.getsize(deploy_pack)
     f_mb = fsize/float(1024)/float(1024)
     print(f'package size: {f_mb*1024:.6f}KB ({f_mb:.4f}MB)')
-    if f_mb > 10:
+    if f_mb > 40:
         print('src too large for ssh.')
         raise NotImplementedError
     try:
