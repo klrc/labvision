@@ -32,19 +32,22 @@ class Status():
     def update(self, status_dict):
         self.status_dict.update(status_dict)
 
+    def epoch_finished(self):
+        return self.status_dict['train']['epoch_finished']
+
+    @property
+    def hash(self):
+        return self.status_dict['hash']
+
+    @property
+    def iter(self):
+        return self.status_dict['train']['iter']
+
+    @property
     def epoch(self):
         if 'train' not in self.status_dict:
             return 0
         return self.status_dict['train']['epoch']
-
-    def iter(self):
-        return self.status_dict['train']['iter']
-
-    def epoch_finished(self):
-        return self.status_dict['train']['epoch_finished']
-
-    def hash(self):
-        return self.status_dict['hash']
 
 
 class AutoControl():
@@ -130,7 +133,7 @@ class AutoControl():
         if pure_log:
             line = f'pure# {msg}'
         else:
-            line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}]<{self.status.hash()}>\t'+msg
+            line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}]<{self.status.hash}>\t'+msg
         if self.under_test:
             line = f'testing# {line}'
         open(self.config.log_path, 'a').write(line+'\n')
@@ -189,7 +192,7 @@ class AutoControl():
                 auto_log:
         """
 
-        train_generator = self.__train__(yield_batches=interval, start_epoch=self.status.epoch())
+        train_generator = self.__train__(yield_batches=interval, start_epoch=self.status.epoch)
         val_generator = self.__val__(yield_batches=val_interval)
 
         while True:
@@ -215,9 +218,9 @@ class AutoControl():
         """
         if type(msg) is dict:
             for k in msg:
-                self.__log__(f'[{self.status.epoch()}, {self.status.iter():5d}/{len(self.trainloader)}] {k}: {msg[k]}', display=display)
+                self.__log__(f'[{self.status.epoch}, {self.status.iter:5d}/{len(self.trainloader)}] {k}: {msg[k]}', display=display)
             return self
-        return self.__log__(f'[{self.status.epoch()}, {self.status.iter():5d}/{len(self.trainloader)}] {msg}', display=display)
+        return self.__log__(f'[{self.status.epoch}, {self.status.iter:5d}/{len(self.trainloader)}] {msg}', display=display)
 
     def forward(self, x):
         """
@@ -230,7 +233,7 @@ class AutoControl():
     def freeze(self, fp=None):
         self.config.status = self.status.status_dict
         if fp is None:
-            fp = f'{self.config.build_dir}/{self.status.hash()}.freeze'
+            fp = f'{self.config.build_dir}/{self.status.hash}.freeze'
         torch.save(self.config.freeze(), fp)
         self.log(f'status saved as {fp}')
         return fp
