@@ -63,6 +63,9 @@ def deploy(src='src', run='main.py', conda_env=None):
         print('user or password not specified, use labvision.io.ssh.set_user() to init remote server.')
         return
     print('transfering deploy package to remote ssh ..')
+    print('\t[remote] cleanning target dir..')
+    ssh.exec_command(f'rm -r {ssh.server_location}')
+    print('\t[remote] uploading ..')
     ssh.upload(deploy_pack, f'{ssh.server_location}/deploy_pack.tar.gz')
     ssh.exec_command(f'cd {ssh.server_location}')
     ssh.exec_command(f'tar -zxvf deploy_pack.tar.gz')

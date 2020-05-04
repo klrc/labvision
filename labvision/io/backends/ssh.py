@@ -77,13 +77,17 @@ def exec_command(command):
     return out, err
 
 
+def sftp_callback(transferred, total):
+    print(f'\t[sftp] transferred/total: {transferred}/{total} ({transferred/total:%})')
+
+
 def upload(local_file, remote_file):
     global ssh
     if ssh is None:
         ssh = connect()
     exec_command(f'mkdir {server_location}')
     sftp = ssh.open_sftp()
-    sftp.put(local_file, remote_file)
+    sftp.put(local_file, remote_file, callback=sftp_callback)
 
 
 if __name__ == "__main__":
