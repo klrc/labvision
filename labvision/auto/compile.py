@@ -159,10 +159,12 @@ class Template():
         self.__datasets.valset = _CompileArgs(datasets)
 
 
-default_config = Template()
+
+def get_default_config():
+    return Template()
 
 
-def compile(config=default_config):
+def compile(config):
     return AutoControl(config.compile())
 
 

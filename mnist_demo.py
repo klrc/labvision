@@ -14,14 +14,15 @@ if __name__ == "__main__":
     config.datasets.root = '/home/sh/Desktop/Research/external/MNIST/'
     config.datasets.transform = ChainedTransform().ToTensor()
     ac = auto.compile(config)
+    ac.check()
 
     for model, status in ac.step(interval=100, val_interval=16):
         if status.epoch_finished():
             ac.metrics('acc@top1')
 
-            if status.epoch > 5:
+            if status.epoch > 3:
                 ac.freeze('build/mnist_demo.freeze')
                 break
 
-    # ac = auto.resume('build/mnist_demo.freeze')
-    # ac.metrics('acc@top1')
+    ac = auto.resume('build/mnist_demo.freeze')
+    ac.metrics('acc@top1')
