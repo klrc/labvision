@@ -3,6 +3,7 @@
 from .utils import ChainedTransform as C_
 
 
+to_tensor = C_().ToTensor()
 empty_transform = C_().ToPILImage().ToTensor()
 
 
