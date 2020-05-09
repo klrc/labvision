@@ -1,8 +1,3 @@
-from . import models
-from . import datasets
-from . import transforms
-from . import io
-from . import auto
-from . import visualize
+from ._utils import init
 
-__all__ = ['models', 'datasets', 'transforms', 'io', 'auto', 'visualize']
+__all__ = ['init']
