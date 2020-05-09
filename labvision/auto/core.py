@@ -4,8 +4,9 @@ import numpy as np
 import torch
 
 from torch.autograd import Variable
-from labvision.auto import functional
-from labvision.utils._config import Config
+from ._config import Config
+from ..utils import functional
+from ..utils import log as logger
 
 
 class Status():
@@ -155,9 +156,9 @@ class AutoCore():
             for k, v in msg.items():
                 self.log(f'{k}: {v}')
             return self
-        msg_head = f'[{self.status.epoch}, {self.status.iter:5d}/{len(self.trainloader)}]'
+        msg_head = f'<{self.status.hash}> [{self.status.epoch}, {self.status.iter:5d}/{len(self.trainloader)}]'
         line = f'{msg_head} {msg}'
-        print(line)
+        logger(line, save_fp=f'{self.root}/server.log')
         return self
 
     def steps(self, iters=None, val_iters=4, max_epoch=None):

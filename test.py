@@ -18,6 +18,8 @@ c.whatever = 20
 core = auto.compile()
 # core = auto.AutoCore(config=c)
 
+core.check()
+
 best_acc = 0
 for status in core.steps(iters=24):
     if status.epoch_finished():

@@ -1,16 +1,6 @@
-from . import core
-from . import functional
 from .core import AutoCore
-__all__ = ['core', 'functional', 'AutoCore']
+from ._config import Config
+from ._utils import init, compile
+__all__ = ['Config', 'AutoCore', 'init', 'compile']
 
 config = None
-
-
-def init():
-    print('init labvision.auto ..')
-
-
-def compile():
-    global config
-    args = config.compile()
-    return core.AutoCore(**args)

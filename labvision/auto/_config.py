@@ -4,8 +4,7 @@ import torch.nn as nn
 import os
 import inspect
 import functools
-import labvision
-from .exceptions import MissingArgsException
+from ..utils.exceptions import MissingArgsException
 
 
 def check_input_isinstance(compile_type='default'):
