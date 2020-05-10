@@ -1,5 +1,5 @@
 .vscode
 .pypirc
-__pycache__/
+__pycache__
 build
 rec.log
