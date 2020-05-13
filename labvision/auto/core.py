@@ -1,16 +1,19 @@
 
 
+import re
 import inspect
 import os
 import random
 import string
 import time
+import json
 
-import numpy as np
 import torch
 from labvision import functional
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
+
+from .utils import manual_seed
 
 
 class MissingArgsException(Exception):
@@ -45,15 +48,21 @@ class Dry():
         def __str__(self):
             return str(self.__dict__)
 
+        def log(self, msg, logger=None):
+            if logger is None:
+                print(msg)
+            else:
+                logger.log(msg)
+
         def compile(self, logger=None, **kwargs):
             args = {k: v for k, v in self.__dict__.items() if k != 'compile_class' and k != 'kwargs'}
             args.update(kwargs)
             try:
+                self.log(f'==> Compiling: {self.compile_class}', logger=logger)
                 for k, v in args.items():
-                    if logger is None:
-                        print(f'set {k} = {v}')
-                    else:
-                        logger.log(f'set {k} = {v}')
+                    if isinstance(v, Dry.Args):
+                        v = v.compile(logger=logger)
+                    self.log(f'  -> Running args hook: {k} = {v}', logger=logger)
                     assert v is not inspect._empty
             except Exception:
                 raise MissingArgsException(k, 'This value must be specified.')
@@ -83,6 +92,8 @@ class Core():
         self.root = root
         self.batch_size = 16
         self.num_workers = 2
+        self.netdata_log_path = None
+        self.auto_log = True
 
     @property
     def model(self): return self.__model
@@ -138,6 +149,13 @@ class Core():
 
     def compile(self):
         return Slave(self)
+
+    def freeze(self, fp):
+        _dir = re.sub(fp.split('/')[-1], '', fp)
+        if not os.path.exists(_dir):
+            os.makedirs(_dir)
+        torch.save(self, fp)
+        return fp
 
 
 class Slave():
@@ -238,19 +256,24 @@ class Slave():
         if valset is None:
             valset = testset
         if isinstance(trainset, Dry.Dataset):
-            self.log(f'compiling train set ..')
             trainset = trainset.compile(train=True, logger=self)
         if isinstance(testset, Dry.Dataset):
-            self.log(f'compiling test set ..')
             testset = testset.compile(train=False, logger=self)
         if isinstance(valset, Dry.Dataset):
-            self.log(f'compiling validation set ..')
             valset = valset.compile(train=False, logger=self)
         self.log(f'compiling dataloaders ..')
         self.trainloader = DataLoader(trainset, batch_size=core.batch_size, shuffle=True, num_workers=core.num_workers)
         self.testloader = DataLoader(testset, batch_size=core.batch_size, shuffle=False, num_workers=core.num_workers)
         self.valloader = DataLoader(valset, batch_size=core.batch_size, shuffle=True, num_workers=core.num_workers)
         self.log('compile finished.')
+
+    def epoch_finished(self): return self.status.epoch_finished()
+    @property
+    def hash(self): return self.status.hash
+    @property
+    def iter(self): return self.status.iter
+    @property
+    def epoch(self): return self.status.epoch
 
     def __step__(self, sample, train=True):
         """
@@ -313,25 +336,30 @@ class Slave():
                     loss = 0.0
 
     def init_seed(self, seed):
-        torch.manual_seed(seed)  # cpu
-        torch.cuda.manual_seed_all(seed)  # gpu
-        np.random.seed(seed)  # numpy
-        random.seed(seed)  # random and transforms
-        torch.backends.cudnn.deterministic = True  # cudnn
-        # https://zhuanlan.zhihu.com/p/76472385
-        # torch.backends.cudnn.benchmark = False
+        self.log(f'init with seed = {seed}')
+        manual_seed(seed)
 
     def log(self, line, time_head=True):
+        if not self.core.auto_log:
+            return
         if self.under_test:
             line = f'testing# {line}'
         if time_head:
             line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}] {line}'
         print(line)
-        with open(f'{self.root}/slave.log', 'a') as f:
+        with open(f'{self.root}/slave.d', 'a') as f:
             f.write(f'{line}\n')
-        return self
+
+    def netdata_log(self, metrics_dict):
+        if not self.core.auto_log:
+            return
+        if self.core.netdata_log_path is not None:
+            with open(self.core.netdata_log_path, "w")as f:
+                json.dump(dict(hash=self.hash, **metrics_dict), f)
 
     def hyper_log(self, msg, time_head=True, hash_head=True, iter_head=True):
+        if not self.core.auto_log:
+            return
         if type(msg) is dict:
             for k, v in msg.items():
                 self.hyper_log(f'{k}: {v}', time_head=time_head, hash_head=hash_head, iter_head=iter_head)
@@ -341,18 +369,27 @@ class Slave():
         if hash_head:
             msg = f'<{self.status.hash}>\t{msg}'
         self.log(msg, time_head=time_head)
-        return self
 
-    def steps(self, iters=None, val_iters=16, max_epoch=None):
+    def __setinterval__(self, iters=None, val_iters=None):
+        if iters:
+            assert iters > 0
+            if iters < 1:
+                iters = int(len(self.trainloader)*iters)
+            self.step_iters = iters
+        if val_iters:
+            assert val_iters > 0
+            if val_iters < 1:
+                val_iters = int(len(self.valloader)*iters)
+            self.val_iters = val_iters
+
+    def steps(self, iters=None, val_iters=None, max_epoch=None):
         '''
             Args:
                 iters: set a checkpoint per <iter> iterations.
                 val_iters: total validation batches for each checkpoint.
                 max_epoch:
         '''
-        if iters:
-            self.step_iters = iters
-        self.val_iters = val_iters
+        self.__setinterval__(iters=iters, val_iters=val_iters)
         while True:
             yield self.step()
             if max_epoch is not None and self.status.epoch > max_epoch:
@@ -366,11 +403,7 @@ class Slave():
                 iters:
                 val_iters:
         """
-        if iters:
-            self.step_iters = iters
-        if val_iters:
-            self.val_iters = val_iters
-
+        self.__setinterval__(iters=iters, val_iters=val_iters)
         if self.__train_generator is None:
             self.__train_generator = self.__train__(start_epoch=self.status.epoch)
             self.__val_generator = self.__val__()
@@ -379,15 +412,17 @@ class Slave():
         state_val = next(self.__val_generator)
         self.status.train.update(state_train)
         self.status.val.update(state_val)
-        self.hyper_log(f'train_loss: {state_train["loss"]}')
-        self.hyper_log(f'val_loss: {state_val["loss"]}')
+        self.hyper_log(f'train_loss: {state_train["loss"]}\tval_loss: {state_val["loss"]}')
+        self.netdata_log(dict(train_loss=state_train["loss"], val_loss=state_val["loss"]))
         return self.status
 
     def check(self, iters=1):
         self.under_test = True
-        self.hyper_log(f'starting check ..', iter_head=False)
+        self.hyper_log(f':: starting check ..', iter_head=False)
         self.step(iters=iters, val_iters=1)
-        self.hyper_log(f'check passed.', iter_head=False)
+        self.__train_generator = None
+        self.__val_generator = None
+        self.hyper_log(f':: check passed.', iter_head=False)
         self.under_test = False
 
     def eval(self, _type=None):
@@ -404,6 +439,7 @@ class Slave():
                 for name, hook_fn in self.eval_hooks:
                     metrics[name] += hook_fn(logits, y)/len(self.testloader)
         self.hyper_log(metrics)
+        self.netdata_log(metrics)
         if _type is not None:
             return metrics[_type]
         return metrics

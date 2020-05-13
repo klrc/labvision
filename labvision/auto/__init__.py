@@ -1,2 +1,3 @@
-from .core import Core, Slave
-__all__ = ['Core', 'Slave']
+from .core import Dry, Core, Slave
+from .utils import manual_seed
+__all__ = ['Dry', 'Core', 'Slave', 'manual_seed']

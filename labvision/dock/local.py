@@ -65,7 +65,3 @@ def pack(source_dir, cache_dir, name='deploy_pack'):
                 print(f'compressing ({current}/{total}): {arcpath}')
     print(f'packing {target_fp}')
     return target_fp
-
-
-if __name__ == "__main__":
-    pass

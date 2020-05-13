@@ -1,8 +1,8 @@
 from . import utils
-from .ldl import FlickrLDL, TwitterLDL
-from .iaps import IAPS, NAPS
-from .emotion_roi import EmotionROI
 from .emod import EMOd
+from .emotion_roi import EmotionROI
 from .fi import FI
+from .iaps import IAPS, NAPS
+from .ldl import FlickrLDL, TwitterLDL
 
 __all__ = ['utils', 'FlickrLDL', 'TwitterLDL', 'IAPS', 'NAPS', 'EmotionROI', 'EMOd', 'FI']

@@ -1,39 +1,30 @@
 
 
-
-
-# from labvision import server
-
-# server.init('my-project')
-# server.set_server('172.20.46.235', '/home/sh/Desktop/remote_deploy')
-# server.set_user('sh', 'sh')
-# server.exec_command('ls')
-# server.close()
-
-
-import torchvision
+from labvision import auto, transforms, datasets
 import torch
-from labvision import auto, transforms
+import torchvision
 
-core = auto.Core('build/test-project')
-transform = transforms.to_tensor
-model = torchvision.models.resnet18()
-model.conv1 = torch.nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
-model.fc = torch.nn.Linear(512, 10)
+
+core = auto.Core('.')
+auto.manual_seed(114514)
+core.seed = 114514
+
+transform = transforms.resize_centercrop_flip(112, (112, 112))
+model = torchvision.models.resnet18(pretrained=True)
+model.fc = torch.nn.Linear(512, 8)
 
 core.model = model
-core.set_datasets(torchvision.datasets.MNIST, root='/home/sh/Desktop/Research/external/MNIST', transform=transform)
+core.set_datasets(datasets.FI, root='/home/sh/Desktop/Research/external/FI', transform=transform)
 
-slave = core.compile()
-slave.check()
+core = core.compile()
+core.check()
 
-# best_acc = 0
-# for status in core.steps(iters=24):
-#     if status.epoch_finished():
-#         acc = core.eval('acc@top3')
-#         print(acc)
-#         if acc > best_acc:
-#             best_acc = acc
-#     if status.epoch > 3:
-#         break
-#         # torch.save(core.model.state_dict(), 'build/best_model.pt')
+best_acc = 0
+for _ in core.steps(iters=0.2):
+    if core.epoch_finished():
+        acc = core.eval('acc@top3')
+        if acc > best_acc:
+            best_acc = acc
+            torch.save(core.model.state_dict(), 'build/best_model.pt')
+    if core.epoch > 3:
+        break
