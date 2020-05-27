@@ -3,7 +3,6 @@ import torch
 import numpy as np
 
 from .utils import Dataset
-from ..transforms.casnet_cvpr_2018 import casnet_fixation_transform
 
 
 def __maxidx__(_list):
@@ -14,9 +13,9 @@ class EMOd(Dataset):
     dataset_labels = ['single', 'distribution', 'vad',  'eyetrack']
     img_dir = 'EMOdImages1019'
 
-    def __init__(self, root='external/EMOd', mask_transform=None, **kwargs):
+    def __init__(self, root, mask_transform, **kwargs):
         super().__init__(root=root, **kwargs)
-        self.init_mask_transform(mask_transform)
+        self.mask_transform = mask_transform
 
     def __readgt__(self, root):
         _dict = {}
@@ -47,11 +46,6 @@ class EMOd(Dataset):
                 _eyetrack = torch.mean(_eyetrack, dim=0)
                 target = _eyetrack
         return img, target
-
-    def init_mask_transform(self, transform):
-        if transform is None:
-            transform = casnet_fixation_transform()
-        self.mask_transform = transform
 
     def load_label(self, root):
         for index, x in enumerate(self.__readgt__(root)):

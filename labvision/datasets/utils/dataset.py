@@ -6,7 +6,6 @@ import numpy as np
 import torch
 import torch.utils.data as data
 from .exceptions import DatasetNotFoundException
-from ...transforms import empty_transform
 
 
 def __maxidx__(_list):
@@ -34,7 +33,7 @@ class Dataset(data.Dataset):
         """
 
         self.init_label_types(label_types)
-        self.init_transform(transform)
+        self.transform = transform
         self.load_data(root, train)
         self.load_label(root)
         self.__totorch__()
@@ -95,7 +94,8 @@ class Dataset(data.Dataset):
                 index:
         """
         img = self.__cvimg__(self.data[index])
-        img = self.transform(img)
+        if self.transform:
+            img = self.transform(img)
         target = [self.ys[k][index] for k in self.ys.keys()]
         if len(target) == 1:
             target = target[0]
@@ -113,11 +113,6 @@ class Dataset(data.Dataset):
         for x in label_types:
             assert x in self.dataset_labels
         self.ys = {x: [] for x in label_types}
-
-    def init_transform(self, transform):
-        if transform is None:
-            transform = empty_transform
-        self.transform = transform
 
     def load_data(self, root, train):
         """

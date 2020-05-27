@@ -10,7 +10,7 @@ def __maxidx__(_list):
 
 
 class FI(Dataset):
-    def __init__(self, root='external/FI', **kwargs):
+    def __init__(self, root, **kwargs):
         super().__init__(root, **kwargs)
 
     def __gensplit__(self, root):

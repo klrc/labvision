@@ -90,7 +90,7 @@ class Server():
         self.ssh = SSHConnector(**kwargs)
         self.cache_dir = 'build'
         self.remote_root = remote_root
-        self.fsize_limit = 40
+        self.fsize_limit = 1024
 
     def deploy(self, src, run='main.py', conda_env=None):
         deploy_pack = pack(src, self.cache_dir)

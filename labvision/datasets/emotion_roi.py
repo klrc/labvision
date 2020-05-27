@@ -8,7 +8,7 @@ def __maxidx__(_list):
 class EmotionROI(Dataset):
     dataset_labels = ['single', 'distribution', 'va']
 
-    def __init__(self, root='external/EmotionROI', **kwargs):
+    def __init__(self, root, **kwargs):
         super().__init__(root, **kwargs)
 
     def __readgt__(self, root):
