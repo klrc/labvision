@@ -3,7 +3,9 @@
 from labvision import auto, transforms, datasets
 import torch
 import torchvision
+import os
 
+os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 core = auto.Core('.')
 auto.manual_seed(114514)

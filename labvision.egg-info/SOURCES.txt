@@ -20,6 +20,8 @@ labvision/datasets/utils/exceptions.py
 labvision/dock/__init__.py
 labvision/dock/local.py
 labvision/dock/server.py
+labvision/dock/visualize/__init__.py
+labvision/dock/visualize/tensorview.py
 labvision/functional/__init__.py
 labvision/functional/accuracy.py
 labvision/transforms/__init__.py

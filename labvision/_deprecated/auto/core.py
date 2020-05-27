@@ -93,6 +93,7 @@ class Core():
         self.batch_size = 16
         self.num_workers = 2
         self.netdata_log_path = None
+        self.slave_log_path = None
         self.auto_log = True
 
     @property
@@ -216,6 +217,7 @@ class Slave():
         self.__train_generator = None
         self.__val_generator = None
         self.under_test = False
+        self.netdata_state = dict(hash=self.hash)
         self.compile(core)
 
     def compile(self, core: Core):
@@ -347,15 +349,19 @@ class Slave():
         if time_head:
             line = f'[{time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}] {line}'
         print(line)
-        with open(f'{self.root}/slave.d', 'a') as f:
+        fp = self.core.slave_log_path
+        if fp is None:
+            fp = f'{self.root}/slave.log'
+        with open(fp, 'a') as f:
             f.write(f'{line}\n')
 
     def netdata_log(self, metrics_dict):
         if not self.core.auto_log:
             return
         if self.core.netdata_log_path is not None:
+            self.netdata_state.update(metrics_dict)
             with open(self.core.netdata_log_path, "w")as f:
-                json.dump(dict(hash=self.hash, **metrics_dict), f)
+                json.dump(self.netdata_state, f)
 
     def hyper_log(self, msg, time_head=True, hash_head=True, iter_head=True):
         if not self.core.auto_log:
@@ -427,16 +433,16 @@ class Slave():
 
     def eval(self, _type=None):
         self.model.eval()
-        if _type == 'acc':
-            self.eval_hooks = [('acc@top1', functional.accuracy)]
+        if _type == 'acc@top1':
+            self._eval_hooks = [('acc@top1', functional.accuracy)]
         if _type == 'acc@top3':
-            self.eval_hooks = [('acc@top3', functional.accuracy_top3)]
-        metrics = {k[0]: 0 for k in self.eval_hooks}
+            self._eval_hooks = [('acc@top3', functional.accuracy_top3)]
+        metrics = {k[0]: 0 for k in self._eval_hooks}
         with torch.no_grad():
             for sample in self.testloader:
                 x, y = self.read_batch(sample)
                 logits = self.forward(x)
-                for name, hook_fn in self.eval_hooks:
+                for name, hook_fn in self._eval_hooks:
                     metrics[name] += hook_fn(logits, y)/len(self.testloader)
         self.hyper_log(metrics)
         self.netdata_log(metrics)
@@ -449,7 +455,7 @@ class Slave():
             Args:
                 hook_fn: hook_fn(logits, y) -> metrics_value
         '''
-        self.eval_hooks.append((name, hook_fn))
+        self._eval_hooks.append((name, hook_fn))
 
     def forward(self, x):
         """
