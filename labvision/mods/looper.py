@@ -37,8 +37,15 @@ class TrainLooper():
                 self.iteration = iteration
                 yield loss
             epoch += 1
-            if epoch > self.max_epoch:
-                return
+            if self.max_epoch is not None:
+                if epoch > self.max_epoch:
+                    return
+
+    @property
+    def epoch_finished(self):
+        if self.iteration + 1 == len(self.trainloader):
+            return True
+        return False
 
     def steps(self, **kwargs):
         while True:
@@ -55,14 +62,17 @@ class TrainLooper():
             iteration = 1  # step for at least 1 iteration.
 
         target_epoch = self.epoch + epoch
+        loss = 0.0
+        total = 0
         while target_epoch > self.epoch:
-            loss = next(self._looper)
-        full_iters = len(self.trainloader)
+            loss += next(self._looper)
+            total += 1
         for _ in range(iteration):
-            loss = next(self._looper)
-            if self.iteration + 1 >= full_iters:
+            loss += next(self._looper)
+            total += 1
+            if self.epoch_finished:
                 break
-        return loss
+        return loss/total
 
     def __iter__(self):
         yield self.step(epoch=1)

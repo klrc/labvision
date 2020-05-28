@@ -8,12 +8,15 @@ def DataLoaders(root, dataset_class, transform_train, transform_test=None, batch
 
     trainset = Dry.Dataset(dataset_class)  # create dry dataset parameters.
     trainset.root = root
+    trainset.train = True
     trainset.transform = transform_train
     testset = Dry.Dataset(dataset_class)  # create dry dataset parameters.
     testset.root = root
+    testset.train = False
     testset.transform = transform_test
     valset = Dry.Dataset(dataset_class)
     valset.root = root
+    valset.train = False
     valset.transform = transform_test
 
     trainloader = Dry.Args(DataLoader)  # init trainloader
