@@ -2,7 +2,7 @@ from . import functional
 
 
 class Accuracy():
-    def __init__(self, testloader, model, topk, cuda, check_type_tensor):
+    def __init__(self, testloader, model, topk=1, cuda=True, check_type_tensor=True):
         self.testloader = testloader
         self.model = model
         self.topk = topk
@@ -24,3 +24,4 @@ class Accuracy():
         elif self._hooked_looper is not None:
             acc = (self._hooked_looper.axis(), acc)
         self.history.append(acc)
+        return acc

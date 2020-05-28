@@ -1,6 +1,6 @@
 def smooth(inputs, weight=0.7):
 
-    inputs = [x[-1] if type(x) is tuple else x for x in inputs.history]  # for reading accuracy_module.history 
+    inputs = [x[-1] if type(x) is tuple else x for x in inputs.history]  # for reading accuracy_module history
 
     for i in range(int(10*weight)+1):
         ret = []

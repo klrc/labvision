@@ -46,7 +46,7 @@ class Dry():
                 self.log(f'==> Compiling: {self.compile_class}', logger=logger)
                 for k, v in args.items():
                     if isinstance(v, Dry.Args):
-                        v = v.compile(logger=logger)
+                        args[k] = v = v.compile(logger=logger)
                     self.log(f'  -> Running args hook: {k} = {v}', logger=logger)
                     assert v is not inspect._empty
             except Exception:
@@ -64,3 +64,4 @@ class Dry():
             super().__init__(compile_class)
             self.root = None
             self.transform = None
+

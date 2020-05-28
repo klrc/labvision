@@ -8,9 +8,9 @@ def _check_batch_data(batch, cuda, check_type_tensor):
             x = torch.tensor(x)
         if not isinstance(target, torch.Tensor):
             target = torch.tensor(target)
-        if cuda:
-            x = x.cuda()
-            target = target.cuda()
+    if cuda:
+        x = x.cuda()
+        target = target.cuda()
     return x, target
 
 

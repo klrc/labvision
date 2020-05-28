@@ -5,7 +5,7 @@ from . import functional
 
 class TrainLooper():
     def __init__(self, trainloader, model, criterion=None, optimizer=None,
-                 max_epoch=None, start_epoch=0):
+                 max_epoch=None, start_epoch=0, cuda=True, check_type_tensor=False):
         self.trainloader = trainloader
         self.model = model
         if criterion is None:
@@ -14,6 +14,8 @@ class TrainLooper():
         if optimizer is None:
             optimizer = torch.optim.SGD(model.parameters(), lr=1e-2)
         self.optimizer = optimizer
+        self.cuda = cuda
+        self.check_type_tensor = check_type_tensor
 
         self.max_epoch = max_epoch
         self.start_epoch = start_epoch
@@ -38,10 +40,15 @@ class TrainLooper():
             if epoch > self.max_epoch:
                 return
 
+    def steps(self, **kwargs):
+        while True:
+            yield(self.step(**kwargs))
+
     def step(self, iteration=0, epoch=0):
         if self._looper is None:
             self._looper = self._main_loop()
-        if epoch < 1:
+            self.epoch = self.start_epoch
+        if 0 < epoch < 1:
             iteration = int(len(self.trainloader)*epoch)  # convert float epoch to iterations
             epoch = 0
         if iteration + epoch == 0:
@@ -62,13 +69,15 @@ class TrainLooper():
 
 
 class ValLooper():
-    def __init__(self, valloader, model, criterion=None):
+    def __init__(self, valloader, model, criterion=None, cuda=True, check_type_tensor=False):
         self.valloader = valloader
         self.model = model
         if criterion is None:
             criterion = torch.nn.CrossEntropyLoss()
         self.criterion = criterion
         self._looper = None
+        self.cuda = cuda
+        self.check_type_tensor = check_type_tensor
 
     def _main_loop(self):
         while True:
