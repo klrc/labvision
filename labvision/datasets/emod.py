@@ -1,6 +1,7 @@
 import scipy.io as scio
 import torch
 import numpy as np
+from PIL import Image
 
 from .utils import Dataset
 
@@ -35,13 +36,15 @@ class EMOd(Dataset):
             if len(self.ys.keys()) > 1:
                 i = [x for x in self.ys.keys()].index('eyetrack')
                 _eyetrack = target[i]
-                _eyetrack = self.__cvimg__(_eyetrack)
+                _eyetrack = Image.open(_eyetrack)
+                # _eyetrack = self.__cvimg__(_eyetrack)
                 _eyetrack = self.mask_transform(_eyetrack)
                 _eyetrack = torch.mean(_eyetrack, dim=0)
                 target[i] = _eyetrack
             else:
                 _eyetrack = target
-                _eyetrack = self.__cvimg__(_eyetrack)
+                _eyetrack = Image.open(_eyetrack)
+                # _eyetrack = self.__cvimg__(_eyetrack)
                 _eyetrack = self.mask_transform(_eyetrack)
                 _eyetrack = torch.mean(_eyetrack, dim=0)
                 target = _eyetrack

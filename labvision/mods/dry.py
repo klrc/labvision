@@ -37,7 +37,7 @@ class Dry():
             if logger is None:
                 print(msg)
             else:
-                logger.log(msg)
+                logger(msg)
 
         def compile(self, logger=None, **kwargs):
             args = {k: v for k, v in self.__dict__.items() if k != 'compile_class' and k != 'kwargs'}
@@ -49,8 +49,9 @@ class Dry():
                         args[k] = v = v.compile(logger=logger)
                     self.log(f'  -> Running args hook: {k} = {v}', logger=logger)
                     assert v is not inspect._empty
-            except Exception:
-                raise MissingArgsException(k, 'This value must be specified.')
+            except Exception as e:
+                print(e)
+                # raise MissingArgsException(k, 'This value must be specified.')
             return self.compile_class(**args)
 
     class Optimizer(Args):

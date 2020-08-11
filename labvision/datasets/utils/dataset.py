@@ -1,11 +1,11 @@
+from .exceptions import DatasetNotFoundException
+import torch.utils.data as data
+import torch
+import numpy as np
 import json
 import os
 import random
-import cv2
-import numpy as np
-import torch
-import torch.utils.data as data
-from .exceptions import DatasetNotFoundException
+from PIL import Image
 
 
 def __maxidx__(_list):
@@ -76,14 +76,15 @@ class Dataset(data.Dataset):
         for key in self.ys.keys():
             self.ys[key] = torch.from_numpy(np.array(self.ys[key]))
 
-    def __cvimg__(self, path, convert2rgb=True):
-        """
-            read image in RGB mode.
-        """
-        img_cv = cv2.imread(path)
-        if convert2rgb:
-            img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
-        return img_cv
+    # def __cvimg__(self, path, convert2rgb=True):
+    #     """
+    #         deprecated method (because of thread lock issue:https://zhuanlan.zhihu.com/p/133707658)
+    #         read image in RGB mode.
+    #     """
+    #     img_cv = cv2.imread(path)
+    #     if convert2rgb:
+    #         img_cv = cv2.cvtColor(img_cv, cv2.COLOR_BGR2RGB)
+    #     return img_cv
 
     def __getitem__(self, index):
         """
@@ -93,7 +94,8 @@ class Dataset(data.Dataset):
             Args:
                 index:
         """
-        img = self.__cvimg__(self.data[index])
+        # img = self.__cvimg__(self.data[index])
+        img = Image.open(self.data[index])
         if self.transform:
             img = self.transform(img)
         target = [self.ys[k][index] for k in self.ys.keys()]
@@ -146,4 +148,5 @@ class Dataset(data.Dataset):
             if 'single' in self.ys.keys():
                 self.ys['single'].append(__maxidx__(y))
             if 'distribution' in self.ys.keys():
-                self.ys['distribution'].append(y)
+                target = np.array(y)/sum(y)
+                self.ys['distribution'].append(target.astype(np.float32))
