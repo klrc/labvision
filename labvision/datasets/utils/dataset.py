@@ -96,6 +96,7 @@ class Dataset(data.Dataset):
         """
         # img = self.__cvimg__(self.data[index])
         img = Image.open(self.data[index])
+        img = img.convert('RGB')
         if self.transform:
             img = self.transform(img)
         target = [self.ys[k][index] for k in self.ys.keys()]

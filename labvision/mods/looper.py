@@ -106,7 +106,7 @@ class ValLooper():
             self._looper = self._main_loop()
 
         if epoch > 0:
-            iteration = int(len(self.trainloader)*epoch)  # convert epoch to iterations
+            iteration = int(len(self.valloader)*epoch)  # convert epoch to iterations
 
         loss = 0.0
         for _ in range(iteration):

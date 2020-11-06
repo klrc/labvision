@@ -14,7 +14,7 @@ class Dry():
     class Args():
         def __init__(self, compile_class):
             parameters = inspect.signature(compile_class).parameters
-            parameter_dict = {k: self.__defaultargs__(v) for k, v in parameters.items()}
+            parameter_dict = {k: self.__defaultargs__(v) for k, v in parameters.items() if k not in ['args', 'kwds']}
             self.compile_class = compile_class
             self.__dict__.update(parameter_dict)
 
